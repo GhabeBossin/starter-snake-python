@@ -1,4 +1,4 @@
-# starter-snake-python
+# starter-snake-python base for VT hackfest 2019
 
 A simple [Battlesnake AI](http://battlesnake.io) written in Python. 
 
@@ -20,7 +20,7 @@ This AI client uses the [bottle web framework](http://bottlepy.org/docs/dev/inde
 
 2) Clone repo to your development environment:
 ```
-git clone git@github.com:<your github username>/starter-snake-python.git
+git clone git@github.com:ghabebossin/starter-snake-python.git
 ```
 
 3) Install dependencies using [pip](https://pip.pypa.io/en/latest/installing.html):
