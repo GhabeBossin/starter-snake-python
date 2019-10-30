@@ -2,6 +2,7 @@ import json
 import os
 import random
 import bottle
+import math
 
 from api import ping_response, start_response, move_response, end_response
 
@@ -39,11 +40,31 @@ def start():
             initialize your snake state here using the
             request's data if necessary.
     """
-    print(json.dumps(data))
 
     color = "#00FF00"
 
     return start_response(color)
+
+def find_food(directions):
+    data = bottle.request.json
+    our_snek = bottle.request.json['you']
+    food_list = bottle.request.json['food']
+    head_position = {
+        'x': our_snek['body']['data'][0]['x'],
+        'y': our_snek['body']['data'][0]['y']
+    }
+
+    for food in food_list['data']:
+        if 'left' in directions and head_position['x'] < food['x']:
+            directions.remove('left')
+        if 'right' in directions and head_position['x'] > food['x']:
+            directions.remove('right')
+        if 'up' in directions and head_position['y'] < food['x']:
+            directions.remove('up')
+        if 'down' in directions and head_position['y'] > food['y']:
+            directions.remove('down')
+
+    return directions
 
 # Do not hit walls
 def do_not_hit_walls(directions):
@@ -57,21 +78,27 @@ def do_not_hit_walls(directions):
         'y': our_snek['body']['data'][0]['y']
     }
 
-    if head_position['x'] == 0:
+    if 'left' in directions and head_position['x'] == 0:
         directions.remove('left')
-    if head_position['x'] == (board_width-1):
+    if 'right' in directions and head_position['x'] == (board_width-1):
         directions.remove('right')
-    if head_position['y'] == 0:
+    if 'up' in directions and head_position['y'] == 0:
         directions.remove('up')
-    if head_position['y'] == (board_height-1):
+    if 'down' in directions and head_position['y'] == (board_height-1):
         directions.remove('down')
 
     return directions
 
+def find_best_move(directions):
+    directions = find_food(directions)
+    directions = do_not_hit_walls(directions)
+    direction = random.choice(directions)
+
+    return direction
+
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    print(json.dumps(data))
 
     our_snek = bottle.request.json['you']
     head_position = {
@@ -97,9 +124,7 @@ def move():
             if 'down' in directions and x == head_position['x'] and y == head_position['y']+1:
                 directions.remove('down')
 
-    directions = do_not_hit_walls(directions)
-
-    direction = random.choice(directions)
+    direction = find_best_move(directions)
 
     return move_response(direction)
 
@@ -112,7 +137,6 @@ def end():
     TODO: If your snake AI was stateful,
         clean up any stateful objects here.
     """
-    print(json.dumps(data))
 
     return end_response()
 
