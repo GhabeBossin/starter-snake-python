@@ -33,17 +33,25 @@ def ping():
 @bottle.post('/start')
 def start():
     data = bottle.request.json
+    data['name'] = 'Letty The Hazard Spaghetti'
+    data['taunt'] = 'HISSSSSSsssssss'
+    head_url = '%s://%s/static/head.png' % (
+        bottle.request.urlparts.scheme,
+        bottle.request.urlparts.netloc
+    )
 
-    """
-    TODO: If you intend to have a stateful snake AI,
-            initialize your snake state here using the
-            request's data if necessary.
-    """
+    lettyData = {
+        'color': '#735DEC',
+        'secondary_color': '#E6E6FA',
+        'taunt': 'HISSSSSSsssssss',
+        'head_url': head_url,
+        'head_type': "smile",
+        'tail_type': "curled",
+    }
+
     print(json.dumps(data))
-
-    color = "#00FF00"
-
-    return start_response(color)
+    print lettyData
+    return lettyData
 
 # Do not hit walls
 def do_not_hit_walls(directions):
