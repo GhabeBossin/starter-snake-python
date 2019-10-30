@@ -32,45 +32,35 @@ def ping():
 
 @bottle.post('/start')
 def start():
-    data = bottle.request.json
+        data = bottle.request.json
+        data['name'] = 'Letty The Hazard Spaghetti'
+        data['taunt'] = 'HISSSSSSsssssss'
+        head_url = '%s://%s/static/head.png' % (
+            bottle.request.urlparts.scheme,
+            bottle.request.urlparts.netloc
+        )
 
-    """
-    TODO: If you intend to have a stateful snake AI,
-            initialize your snake state here using the
-            request's data if necessary.
-    """
-    print(json.dumps(data))
+        lettyData = {
+            'color': '#735DEC',
+            'secondary_color': '#E6E6FA',
+            'taunt': 'HISSSSSSsssssss',
+            'head_url': head_url,
+            'head_type': "smile",
+            'tail_type': "curled",
+        }
 
-    color = "#00FF00"
-
-    return start_response(color)
-
-# Do not hit walls
-def do_not_hit_walls(directions):
-    data = bottle.request.json
-    our_snek = bottle.request.json['you']
-    board_width = data.get('width')
-    board_height = data.get('height')
-
-    head_position = {
-        'x': our_snek['body']['data'][0]['x'],
-        'y': our_snek['body']['data'][0]['y']
-    }
-
-    if head_position['x'] == 0:
-        directions.remove('left')
-    if head_position['x'] == (board_width-1):
-        directions.remove('right')
-    if head_position['y'] == 0:
-        directions.remove('up')
-    if head_position['y'] == (board_height-1):
-        directions.remove('down')
-
-    return directions
+        print(json.dumps(data))
+        print lettyData
+        return lettyData
 
 @bottle.post('/move')
 def move():
     data = bottle.request.json
+
+    """
+    TODO: Using the data from the endpoint request object, your
+            snake AI must choose a direction to move in.
+    """
     print(json.dumps(data))
 
     our_snek = bottle.request.json['you']
@@ -79,11 +69,10 @@ def move():
         'y': our_snek['body']['data'][0]['y']
     }
 
+    #don't hit another snek
     directions = ['up', 'down', 'left', 'right']
-
     all_sneks = bottle.request.json['snakes']
 
-    #don't hit another snek
     for snek in all_sneks['data']:
         for positions in snek['body']['data']:
             x = positions['x']
@@ -96,8 +85,6 @@ def move():
                 directions.remove('up')
             if 'down' in directions and x == head_position['x'] and y == head_position['y']+1:
                 directions.remove('down')
-
-    directions = do_not_hit_walls(directions)
 
     direction = random.choice(directions)
 
