@@ -40,7 +40,6 @@ def start():
             initialize your snake state here using the
             request's data if necessary.
     """
-    #print(json.dumps(data))
 
     color = "#00FF00"
 
@@ -92,9 +91,7 @@ def do_not_hit_walls(directions):
 
 def find_best_move(directions):
     directions = find_food(directions)
-
     directions = do_not_hit_walls(directions)
-
     direction = random.choice(directions)
 
     return direction
@@ -102,7 +99,6 @@ def find_best_move(directions):
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    #print(json.dumps(data))
 
     our_snek = bottle.request.json['you']
     head_position = {
@@ -141,7 +137,6 @@ def end():
     TODO: If your snake AI was stateful,
         clean up any stateful objects here.
     """
-    #print(json.dumps(data))
 
     return end_response()
 
