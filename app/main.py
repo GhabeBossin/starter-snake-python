@@ -80,6 +80,7 @@ def find_closest_food(food):
     closest_food = None
     food_list = bottle.request.json['food']
     our_snek = bottle.request.json['you']
+
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
@@ -121,11 +122,18 @@ def do_not_hit_walls(directions):
     return directions
 
 def find_best_move(directions):
+    our_snek = bottle.request.json['you']
+    health = our_snek['health']
+
     directions = do_not_hit_walls(directions)
     possible_directions = list(directions)
-    directions = find_food(directions)
+
+    if health <= 50:
+        directions = find_food(directions)
+
     if len(directions)==0:
         directions = possible_directions
+
     direction = random.choice(directions)
 
     return direction
