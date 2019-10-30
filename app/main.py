@@ -63,7 +63,16 @@ def find_food(directions):
         'y': our_snek['body']['data'][0]['y']
     }
 
-    closest_food = find_closest_food(food_list)
+    closest_food_results = find_closest_food(food_list)
+    closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
+    while(closer_snake):
+        food_list['data'].remove(closest_food_results['food'])
+        closest_food_results = find_closest_food(food_list)
+        #if we are not closer to any of the food
+        if closest_food_results['food'] is None:
+            return directions
+        closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
+    closest_food = closest_food_results['food']
     if 'left' in directions and head_position['x'] < closest_food['x']:
         directions.remove('left')
     if 'right' in directions and head_position['x'] > closest_food['x']:
@@ -95,7 +104,21 @@ def find_closest_food(food):
         if total_distance < shortest_distance:
             shortest_distance = total_distance
             closest_food = food
-    return closest_food
+    return {'food': closest_food, 'distance': shortest_distance}
+
+def check_for_closer_snake(food, our_snek_head, our_distance):
+    all_sneks = bottle.request.json['snakes']
+    for snek in all_sneks['data']:
+        snek_head = snek['body']['data'][0]
+        #don't check our snake
+        if snek_head['x'] == our_snek_head['x'] and snek_head['y'] == our_snek_head['y']:
+            continue
+        x_distance = abs(snek_head['x'] - food['x'])
+        y_distance = abs(snek_head['y'] - food['y'])
+        total_distance = math.sqrt((x_distance**2)+(y_distance**2))
+        if total_distance < our_distance:
+            return True
+    return False
 
 # Do not hit walls
 def do_not_hit_walls(directions):
