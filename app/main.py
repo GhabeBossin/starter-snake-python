@@ -63,17 +63,39 @@ def find_food(directions):
         'y': our_snek['body']['data'][0]['y']
     }
 
-    for food in food_list['data']:
-        if 'left' in directions and head_position['x'] < food['x']:
-            directions.remove('left')
-        if 'right' in directions and head_position['x'] > food['x']:
-            directions.remove('right')
-        if 'up' in directions and head_position['y'] < food['x']:
-            directions.remove('up')
-        if 'down' in directions and head_position['y'] > food['y']:
-            directions.remove('down')
+    closest_food = find_closest_food(food_list)
+    if 'left' in directions and head_position['x'] < closest_food['x']:
+        directions.remove('left')
+    if 'right' in directions and head_position['x'] > closest_food['x']:
+        directions.remove('right')
+    if 'up' in directions and head_position['y'] < closest_food['x']:
+        directions.remove('up')
+    if 'down' in directions and head_position['y'] > closest_food['y']:
+        directions.remove('down')
 
     return directions
+
+def find_closest_food(food):
+    shortest_distance = 1000
+    closest_food = None
+    food_list = bottle.request.json['food']
+    our_snek = bottle.request.json['you']
+    head_position = {
+        'x': our_snek['body']['data'][0]['x'],
+        'y': our_snek['body']['data'][0]['y']
+    }
+    #find closest food
+    for food in food_list['data']:
+        x_distance = abs(head_position['x'] - food['x'])
+        y_distance = abs(head_position['y'] - food['y'])
+        total_distance = math.sqrt((x_distance**2)+(y_distance**2))
+        if closest_food is None:
+            shortest_distance = total_distance
+            closest_food = food
+        if total_distance < shortest_distance:
+            shortest_distance = total_distance
+            closest_food = food
+    return closest_food
 
 # Do not hit walls
 def do_not_hit_walls(directions):
@@ -99,8 +121,11 @@ def do_not_hit_walls(directions):
     return directions
 
 def find_best_move(directions):
-    directions = find_food(directions)
     directions = do_not_hit_walls(directions)
+    possible_directions = list(directions)
+    directions = find_food(directions)
+    if len(directions)==0:
+        directions = possible_directions
     direction = random.choice(directions)
 
     return direction
