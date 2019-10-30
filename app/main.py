@@ -148,6 +148,7 @@ def find_best_move(directions):
     our_snek = bottle.request.json['you']
     health = our_snek['health']
 
+    directions = avoid_other_sneks(directions)
     directions = do_not_hit_walls(directions)
     possible_directions = list(directions)
 
@@ -161,22 +162,16 @@ def find_best_move(directions):
 
     return direction
 
-@bottle.post('/move')
-def move():
-    data = bottle.request.json
-
+def avoid_other_sneks(directions):
     our_snek = bottle.request.json['you']
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
     }
-
-    directions = ['up', 'down', 'left', 'right']
-
     all_sneks = bottle.request.json['snakes']
-
     #don't hit another snek
     for snek in all_sneks['data']:
+        head = snek['body']['data'][0]
         for positions in snek['body']['data']:
             x = positions['x']
             y = positions['y']
@@ -188,6 +183,36 @@ def move():
                 directions.remove('up')
             if 'down' in directions and x == head_position['x'] and y == head_position['y']+1:
                 directions.remove('down')
+        possible_directions = list(directions)
+        #don't move where other snake's head could move
+        x = head['x']
+        y = head['y']
+        if x == head_position['x'] and y == head_position['y']:
+            continue
+        possible_new_positions = [
+            {'x': x+1, 'y':y},
+            {'x': x-1, 'y':y},
+            {'x': x, 'y':y+1},
+            {'x': x, 'y':y-1},
+        ]
+        if 'left' in directions and {'x': head_position['x']-1, 'y': head_position['y']} in possible_new_positions:
+            directions.remove('left')
+        if 'right' in directions and {'x': head_position['x']+1, 'y': head_position['y']} in possible_new_positions:
+            directions.remove('right')
+        if 'up' in directions and {'x': head_position['x'], 'y': head_position['y']-1} in possible_new_positions:
+            directions.remove('up')
+        if 'down' in directions and {'x': head_position['x'], 'y': head_position['y']+1} in possible_new_positions:
+            directions.remove('down')
+        #in case we removed all directions
+        if len(directions) == 0:
+            directions = possible_directions
+    return directions
+
+@bottle.post('/move')
+def move():
+    data = bottle.request.json
+
+    directions = ['up', 'down', 'left', 'right']
 
     direction = find_best_move(directions)
 
