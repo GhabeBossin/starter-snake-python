@@ -56,7 +56,29 @@ def move():
     """
     print(json.dumps(data))
 
+    our_snek = bottle.request.json['you']
+    head_position = {
+        'x': our_snek['body']['data'][0]['x'],
+        'y': our_snek['body']['data'][0]['y']
+    }
+
+    #don't hit another snek
     directions = ['up', 'down', 'left', 'right']
+    all_sneks = bottle.request.json['snakes']
+
+    for snek in all_sneks['data']:
+        for positions in snek['body']['data']:
+            x = positions['x']
+            y = positions['y']
+            if 'left' in directions and y == head_position['y'] and x == head_position['x']-1:
+                directions.remove('left')
+            if 'right' in directions and y == head_position['y'] and x == head_position['x']+1:
+                directions.remove('right')
+            if 'up' in directions and x == head_position['x'] and y == head_position['y']-1:
+                directions.remove('up')
+            if 'down' in directions and x == head_position['x'] and y == head_position['y']+1:
+                directions.remove('down')
+
     direction = random.choice(directions)
 
     return move_response(direction)
