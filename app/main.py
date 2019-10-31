@@ -65,7 +65,6 @@ def chase_tail(directions):
     our_snek = data['you']
     our_snek_data = our_snek['body']
     snek_coords = our_snek_data['data']
-
     head_position = { 'x': our_snek['body']['data'][0]['x'], 'y': our_snek['body']['data'][0]['y'] }
     tail_position = { 'x': our_snek['body']['data'][len(snek_coords)-1]['x'], 'y': our_snek['body']['data'][len(snek_coords)-1]['y'] }
 
