@@ -12,6 +12,8 @@ def index():
     return '''
     Battlesnake documentation can be found at
        <a href="https://docs.battlesnake.io">https://docs.battlesnake.io</a>.
+    Our repo for this snake, Letty the Hazard Spaghetti, can be found on
+       <a href="https://github.com/GhabeBossin/starter-snake-python">github</a>.
     '''
 
 @bottle.route('/static/<path:path>')
@@ -60,10 +62,9 @@ def a_star():
 
 def chase_tail(directions):
     data = bottle.request.json
-    our_snek = bottle.request.json['you']
+    our_snek = data['you']
     our_snek_data = our_snek['body']
     snek_coords = our_snek_data['data']
-
     head_position = { 'x': our_snek['body']['data'][0]['x'], 'y': our_snek['body']['data'][0]['y'] }
     tail_position = { 'x': our_snek['body']['data'][len(snek_coords)-1]['x'], 'y': our_snek['body']['data'][len(snek_coords)-1]['y'] }
 
@@ -88,10 +89,10 @@ def chase_tail(directions):
 
 def game_board(data):
     data = bottle.request.json
-    food_list = bottle.request.json['food']
+    food_list = data['food']
     snake_list = data['snakes']
-    board_height = data.get('height')
     board_width = data.get('width')
+    board_height = data.get('height')
     board_matrix = np.chararray((board_height, board_width))
     board_matrix[:] = ''
 
@@ -109,8 +110,8 @@ def game_board(data):
 
 def find_food(directions):
     data = bottle.request.json
-    our_snek = bottle.request.json['you']
-    food_list = bottle.request.json['food']
+    our_snek = data['you']
+    food_list = data['food']
     health = our_snek['health']
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
@@ -156,10 +157,11 @@ def find_food(directions):
     return directions
 
 def find_closest_food(food):
+    data = bottle.request.json
+    our_snek = data['you']
+    food_list = data['food']
     shortest_distance = 1000
     closest_food = None
-    food_list = bottle.request.json['food']
-    our_snek = bottle.request.json['you']
 
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
@@ -195,10 +197,9 @@ def check_for_closer_snake(food, our_snek_head, our_distance):
 # Do not hit walls
 def do_not_hit_walls(directions):
     data = bottle.request.json
-    our_snek = bottle.request.json['you']
+    our_snek = data['you']
     board_width = data.get('width')
     board_height = data.get('height')
-
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
@@ -219,7 +220,7 @@ def find_best_move(directions):
     data = bottle.request.json
     board_width = data.get('width')
     board_height = data.get('height')
-    our_snek = bottle.request.json['you']
+    our_snek = data['you']
     health = our_snek['health']
 
     directions = avoid_other_sneks(directions)
@@ -246,12 +247,14 @@ def find_best_move(directions):
     return direction
 
 def avoid_other_sneks(directions):
-    our_snek = bottle.request.json['you']
+    data = bottle.request.json
+    our_snek = data['you']
+    all_sneks = data['snakes']
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
     }
-    all_sneks = bottle.request.json['snakes']
+
     #don't hit another snek
     for snek in all_sneks['data']:
         head = snek['body']['data'][0]
@@ -270,13 +273,15 @@ def avoid_other_sneks(directions):
     return directions
 
 def avoid_head_on_collisions(directions):
-    our_snek = bottle.request.json['you']
-    our_length = bottle.request.json['you']['length']
+    data = bottle.request.json
+    our_snek = data['you']
+    all_sneks = data['snakes']
+    our_length = data['you']['length']
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
     }
-    all_sneks = bottle.request.json['snakes']
+
     #don't hit another snek
     for snek in all_sneks['data']:
         head = snek['body']['data'][0]
@@ -308,7 +313,7 @@ def avoid_head_on_collisions(directions):
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    our_snek = bottle.request.json['you']
+    our_snek = data['you']
     health = our_snek['health']
 
     board = game_board(data)
@@ -325,12 +330,6 @@ def move():
 @bottle.post('/end')
 def end():
     data = bottle.request.json
-
-    """
-    TODO: If your snake AI was stateful,
-        clean up any stateful objects here.
-    """
-
     return end_response()
 
 # Expose WSGI app (so gunicorn can find it)
