@@ -50,7 +50,7 @@ def start():
         'tail_type': "curled",
     }
 
-    return lettyData
+    return start_response('#735dec')
 
 def chase_tail(directions):
     data = bottle.request.json
