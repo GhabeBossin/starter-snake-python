@@ -328,6 +328,12 @@ def move():
 @bottle.post('/end')
 def end():
     data = bottle.request.json
+
+    """
+    TODO: If your snake AI was stateful,
+        clean up any stateful objects here.
+    """
+
     return end_response()
 
 # Expose WSGI app (so gunicorn can find it)
