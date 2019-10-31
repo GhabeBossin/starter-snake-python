@@ -58,6 +58,26 @@ def start():
 def a_star():
     return false
 
+def chase_tail(directions):
+    data = bottle.request.json
+    our_snek = bottle.request.json['you']
+    our_snek_data = our_snek['body']
+    snek_coords = our_snek_data['data']
+
+    head_position = { 'x': our_snek['body']['data'][0]['x'], 'y': our_snek['body']['data'][0]['y'] }
+    tail_position = { 'x': our_snek['body']['data'][len(snek_coords)-1]['x'], 'y': our_snek['body']['data'][len(snek_coords)-1]['y'] }
+
+    if head_position['x'] < tail_position['x'] and 'left' in directions:
+        directions.remove('left')
+    if head_position['x'] > tail_position['x'] and 'right' in directions:
+        directions.remove('right')
+    if head_position['y'] < tail_position['y'] and 'down' in directions:
+        directions.remove('down')
+    if head_position['y'] > tail_position['y'] and 'up' in directions:
+        directions.remove('up')
+
+    return directions
+
 def game_board(data):
     data = bottle.request.json
     food_list = bottle.request.json['food']
@@ -197,11 +217,14 @@ def find_best_move(directions):
         directions = list(possible_directions)
     possible_directions = list(directions)
 
-    if health <= 50:
+    if health > 50:
+        directions = chase_tail(directions)
+    elif health <= 50:
         directions = find_food(directions)
-
-    if len(directions)==0:
+    elif len(directions)==0:
         directions = list(possible_directions)
+    else:
+        pass
 
     direction = random.choice(directions)
 
@@ -270,6 +293,8 @@ def avoid_head_on_collisions(directions):
 @bottle.post('/move')
 def move():
     data = bottle.request.json
+    our_snek = bottle.request.json['you']
+    health = our_snek['health']
 
     board = game_board(data)
 
