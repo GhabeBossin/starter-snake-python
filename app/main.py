@@ -3,6 +3,7 @@ import os
 import random
 import bottle
 import math
+import numpy as np
 
 from api import ping_response, start_response, move_response, end_response
 
@@ -53,6 +54,30 @@ def start():
     print(json.dumps(data))
     print lettyData
     return lettyData
+
+def a_star():
+    return false
+
+def game_board(data):
+    data = bottle.request.json
+    food_list = bottle.request.json['food']
+    snake_list = data['snakes']
+    board_height = data.get('height')
+    board_width = data.get('width')
+    board_matrix = np.chararray((board_height, board_width))
+    board_matrix[:] = ''
+
+    # Mark food cells
+    for food in food_list['data']:
+        board_matrix[food['x'], food['y']] = 'F'
+
+    # Mark other snek cells
+    for snake in snake_list['data']:
+        snake_obj = snake['body']
+        snake_body = snake_obj['data']
+        for coord in snake_body:
+            board_matrix[coord['x'], coord['y']] = 'S'
+    return board_matrix
 
 def find_food(directions):
     data = bottle.request.json
@@ -245,6 +270,10 @@ def avoid_head_on_collisions(directions):
 @bottle.post('/move')
 def move():
     data = bottle.request.json
+
+    board = game_board(data)
+
+    # print(board)
 
     directions = ['up', 'down', 'left', 'right']
 
