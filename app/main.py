@@ -245,6 +245,7 @@ def avoid_head_on_collisions(directions):
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
     }
+
     #don't hit another snek
     for snek in all_sneks['data']:
         head = snek['body']['data'][0]
