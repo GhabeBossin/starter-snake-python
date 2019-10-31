@@ -111,6 +111,7 @@ def find_food(directions):
     data = bottle.request.json
     our_snek = bottle.request.json['you']
     food_list = bottle.request.json['food']
+    health = our_snek['health']
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
@@ -118,13 +119,14 @@ def find_food(directions):
 
     closest_food_results = find_closest_food(food_list)
     closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
-    while(closer_snake):
-        food_list['data'].remove(closest_food_results['food'])
-        closest_food_results = find_closest_food(food_list)
-        #if we are not closer to any of the food
-        if closest_food_results['food'] is None:
-            return directions
-        closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
+    if health > 50:
+        while(closer_snake):
+            food_list['data'].remove(closest_food_results['food'])
+            closest_food_results = find_closest_food(food_list)
+            #if we are not closer to any of the food
+            if closest_food_results['food'] is None:
+                return directions
+            closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
     closest_food = closest_food_results['food']
     #on same y axis
     if head_position['y'] == closest_food['y'] and 'right' in directions and head_position['x'] < closest_food['x']:
@@ -214,6 +216,9 @@ def do_not_hit_walls(directions):
     return directions
 
 def find_best_move(directions):
+    data = bottle.request.json
+    board_width = data.get('width')
+    board_height = data.get('height')
     our_snek = bottle.request.json['you']
     health = our_snek['health']
 
@@ -221,11 +226,12 @@ def find_best_move(directions):
     directions = do_not_hit_walls(directions)
     possible_directions = list(directions)
     avoid_head_on_collisions(directions)
-    if len(directions)==0:
+
+    if len(directions) == 0:
         directions = list(possible_directions)
     possible_directions = list(directions)
 
-    if health > 50:
+    if health > 70:
         directions = chase_tail(directions)
     elif health <= 50:
         directions = find_food(directions)
