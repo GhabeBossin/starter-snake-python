@@ -52,7 +52,7 @@ def start():
     }
 
     print(json.dumps(data))
-    print lettyData
+    print(lettyData)
     return lettyData
 
 def a_star():
