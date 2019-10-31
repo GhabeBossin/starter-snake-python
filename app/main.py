@@ -41,7 +41,6 @@ def start():
         bottle.request.urlparts.scheme,
         bottle.request.urlparts.netloc
     )
-
     lettyData = {
         'color': '#735DEC',
         'secondary_color': '#E6E6FA',
@@ -51,12 +50,7 @@ def start():
         'tail_type': "curled",
     }
 
-    print(json.dumps(data))
-    print(lettyData)
     return lettyData
-
-def a_star():
-    return false
 
 def chase_tail(directions):
     data = bottle.request.json
@@ -115,10 +109,12 @@ def find_food(directions):
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
     }
-
     closest_food_results = find_closest_food(food_list)
     closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
-    if health > 50:
+
+    # while snake isn't super hungry
+    if health > 40:
+        # seek food, defensively
         while(closer_snake):
             food_list['data'].remove(closest_food_results['food'])
             closest_food_results = find_closest_food(food_list)
@@ -126,6 +122,7 @@ def find_food(directions):
             if closest_food_results['food'] is None:
                 return directions
             closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
+
     closest_food = closest_food_results['food']
     #on same y axis
     if head_position['y'] == closest_food['y'] and 'right' in directions and head_position['x'] < closest_food['x']:
@@ -160,11 +157,11 @@ def find_closest_food(food):
     food_list = data['food']
     shortest_distance = 1000
     closest_food = None
-
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
     }
+
     #find closest food
     for food in food_list['data']:
         x_distance = abs(head_position['x'] - food['x'])
@@ -180,6 +177,7 @@ def find_closest_food(food):
 
 def check_for_closer_snake(food, our_snek_head, our_distance):
     all_sneks = bottle.request.json['snakes']
+
     for snek in all_sneks['data']:
         snek_head = snek['body']['data'][0]
         #don't check our snake
@@ -216,11 +214,10 @@ def do_not_hit_walls(directions):
 
 def find_best_move(directions):
     data = bottle.request.json
-    board_width = data.get('width')
-    board_height = data.get('height')
     our_snek = data['you']
     health = our_snek['health']
-
+    board_width = data.get('width')
+    board_height = data.get('height')
     directions = avoid_other_sneks(directions)
     directions = do_not_hit_walls(directions)
     possible_directions = list(directions)
@@ -239,7 +236,6 @@ def find_best_move(directions):
     else:
         pass
 
-    print(directions)
     direction = random.choice(directions)
 
     return direction
@@ -313,17 +309,11 @@ def move():
     data = bottle.request.json
     our_snek = data['you']
     health = our_snek['health']
-
     board = game_board(data)
-
-    # print(board)
-
     directions = ['up', 'down', 'left', 'right']
-
     direction = find_best_move(directions)
 
     return move_response(direction)
-
 
 @bottle.post('/end')
 def end():
