@@ -41,6 +41,7 @@ def start():
         bottle.request.urlparts.scheme,
         bottle.request.urlparts.netloc
     )
+
     lettyData = {
         'color': '#735DEC',
         'secondary_color': '#E6E6FA',
@@ -50,7 +51,8 @@ def start():
         'tail_type': "curled",
     }
 
-    return start_response('#735dec')
+    # return start_response('#735dec')
+    return lettyData
 
 def chase_tail(directions):
     data = bottle.request.json
