@@ -73,11 +73,27 @@ def find_food(directions):
             return directions
         closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
     closest_food = closest_food_results['food']
+    #on same y axis
+    if head_position['y'] == closest_food['y'] and 'right' in directions and head_position['x'] < closest_food['x']:
+        directions = ['right']
+        return directions
+    #on same y axis
+    if head_position['y'] == closest_food['y'] and 'left' in directions and head_position['x'] > closest_food['x']:
+        directions = ['left']
+        return directions
+    #on same x axis
+    if head_position['x'] == closest_food['x'] and 'down' in directions and head_position['y'] < closest_food['y']:
+        directions = ['down']
+        return directions
+    #on same x axis
+    if head_position['x'] == closest_food['x'] and 'up' in directions and head_position['y'] > closest_food['y']:
+        directions = ['up']
+        return directions
     if 'left' in directions and head_position['x'] < closest_food['x']:
         directions.remove('left')
     if 'right' in directions and head_position['x'] > closest_food['x']:
         directions.remove('right')
-    if 'up' in directions and head_position['y'] < closest_food['x']:
+    if 'up' in directions and head_position['y'] < closest_food['y']:
         directions.remove('up')
     if 'down' in directions and head_position['y'] > closest_food['y']:
         directions.remove('down')
@@ -153,14 +169,14 @@ def find_best_move(directions):
     possible_directions = list(directions)
     avoid_head_on_collisions(directions)
     if len(directions)==0:
-        directions = possible_directions
-    possible_directions = directions
+        directions = list(possible_directions)
+    possible_directions = list(directions)
 
     if health <= 50:
         directions = find_food(directions)
 
     if len(directions)==0:
-        directions = possible_directions
+        directions = list(possible_directions)
 
     direction = random.choice(directions)
 
