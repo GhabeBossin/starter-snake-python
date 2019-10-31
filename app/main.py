@@ -12,8 +12,6 @@ def index():
     return '''
     Battlesnake documentation can be found at
        <a href="https://docs.battlesnake.io">https://docs.battlesnake.io</a>.
-    Our repo for this snake, Letty the Hazard Spaghetti, can be found on
-       <a href="https://github.com/GhabeBossin/starter-snake-python">github</a>.
     '''
 
 @bottle.route('/static/<path:path>')
