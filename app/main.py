@@ -151,6 +151,10 @@ def find_best_move(directions):
     directions = avoid_other_sneks(directions)
     directions = do_not_hit_walls(directions)
     possible_directions = list(directions)
+    avoid_head_on_collisions(directions)
+    if len(directions)==0:
+        directions = possible_directions
+    possible_directions = directions
 
     if health <= 50:
         directions = find_food(directions)
@@ -184,9 +188,24 @@ def avoid_other_sneks(directions):
             if 'down' in directions and x == head_position['x'] and y == head_position['y']+1:
                 directions.remove('down')
         possible_directions = list(directions)
+    return directions
+
+def avoid_head_on_collisions(directions):
+    our_snek = bottle.request.json['you']
+    our_length = bottle.request.json['you']['length']
+    head_position = {
+        'x': our_snek['body']['data'][0]['x'],
+        'y': our_snek['body']['data'][0]['y']
+    }
+    all_sneks = bottle.request.json['snakes']
+    #don't hit another snek
+    for snek in all_sneks['data']:
+        head = snek['body']['data'][0]
+        length = snek['length']
         #don't move where other snake's head could move
         x = head['x']
         y = head['y']
+        #don't check our own snake
         if x == head_position['x'] and y == head_position['y']:
             continue
         possible_new_positions = [
@@ -195,17 +214,16 @@ def avoid_other_sneks(directions):
             {'x': x, 'y':y+1},
             {'x': x, 'y':y-1},
         ]
-        if 'left' in directions and {'x': head_position['x']-1, 'y': head_position['y']} in possible_new_positions:
-            directions.remove('left')
-        if 'right' in directions and {'x': head_position['x']+1, 'y': head_position['y']} in possible_new_positions:
-            directions.remove('right')
-        if 'up' in directions and {'x': head_position['x'], 'y': head_position['y']-1} in possible_new_positions:
-            directions.remove('up')
-        if 'down' in directions and {'x': head_position['x'], 'y': head_position['y']+1} in possible_new_positions:
-            directions.remove('down')
-        #in case we removed all directions
-        if len(directions) == 0:
-            directions = possible_directions
+        #don't worry about collisions if we are bigger
+        if our_length <= length:
+            if 'left' in directions and {'x': head_position['x']-1, 'y': head_position['y']} in possible_new_positions:
+                directions.remove('left')
+            if 'right' in directions and {'x': head_position['x']+1, 'y': head_position['y']} in possible_new_positions:
+                directions.remove('right')
+            if 'up' in directions and {'x': head_position['x'], 'y': head_position['y']-1} in possible_new_positions:
+                directions.remove('up')
+            if 'down' in directions and {'x': head_position['x'], 'y': head_position['y']+1} in possible_new_positions:
+                directions.remove('down')
     return directions
 
 @bottle.post('/move')
