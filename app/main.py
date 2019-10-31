@@ -54,6 +54,9 @@ def start():
     print lettyData
     return lettyData
 
+def a_star():
+    return false
+
 def find_food(directions):
     data = bottle.request.json
     our_snek = bottle.request.json['you']
