@@ -62,7 +62,7 @@ def a_star():
 
 def chase_tail(directions):
     data = bottle.request.json
-    our_snek = bottle.request.json['you']
+    our_snek = data['you']
     our_snek_data = our_snek['body']
     snek_coords = our_snek_data['data']
 
@@ -92,8 +92,8 @@ def game_board(data):
     data = bottle.request.json
     food_list = data['food']
     snake_list = data['snakes']
-    board_height = data.get('height')
     board_width = data.get('width')
+    board_height = data.get('height')
     board_matrix = np.chararray((board_height, board_width))
     board_matrix[:] = ''
 
@@ -113,6 +113,7 @@ def find_food(directions):
     data = bottle.request.json
     our_snek = data['you']
     food_list = data['food']
+    health = our_snek['health']
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
@@ -120,13 +121,14 @@ def find_food(directions):
 
     closest_food_results = find_closest_food(food_list)
     closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
-    while(closer_snake):
-        food_list['data'].remove(closest_food_results['food'])
-        closest_food_results = find_closest_food(food_list)
-        #if we are not closer to any of the food
-        if closest_food_results['food'] is None:
-            return directions
-        closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
+    if health > 50:
+        while(closer_snake):
+            food_list['data'].remove(closest_food_results['food'])
+            closest_food_results = find_closest_food(food_list)
+            #if we are not closer to any of the food
+            if closest_food_results['food'] is None:
+                return directions
+            closer_snake = check_for_closer_snake(closest_food_results['food'], head_position, closest_food_results['distance'])
     closest_food = closest_food_results['food']
     #on same y axis
     if head_position['y'] == closest_food['y'] and 'right' in directions and head_position['x'] < closest_food['x']:
@@ -199,7 +201,6 @@ def do_not_hit_walls(directions):
     our_snek = data['you']
     board_width = data.get('width')
     board_height = data.get('height')
-
     head_position = {
         'x': our_snek['body']['data'][0]['x'],
         'y': our_snek['body']['data'][0]['y']
@@ -217,18 +218,22 @@ def do_not_hit_walls(directions):
     return directions
 
 def find_best_move(directions):
-    our_snek = bottle.request.json['you']
+    data = bottle.request.json
+    board_width = data.get('width')
+    board_height = data.get('height')
+    our_snek = data['you']
     health = our_snek['health']
 
     directions = avoid_other_sneks(directions)
     directions = do_not_hit_walls(directions)
     possible_directions = list(directions)
     avoid_head_on_collisions(directions)
-    if len(directions)==0:
+
+    if len(directions) == 0:
         directions = list(possible_directions)
     possible_directions = list(directions)
 
-    if health > 50:
+    if health > 70:
         directions = chase_tail(directions)
     elif health <= 50:
         directions = find_food(directions)
