@@ -230,7 +230,7 @@ def find_best_move(directions):
         directions = list(possible_directions)
     possible_directions = list(directions)
 
-    if health > 70:
+    if health > 85:
         directions = chase_tail(directions)
     elif health <= 50:
         directions = find_food(directions)
